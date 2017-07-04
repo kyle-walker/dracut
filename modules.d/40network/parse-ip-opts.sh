@@ -5,11 +5,12 @@
 #
 #       ip=<interface>:[dhcp|on|any][:[<mtu>][:<macaddr>]]
 #
-#       ip=<client-IP-number>:<server-IP-number>:<gateway-IP-number>:<netmask>:<client-hostname>:<interface>:{dhcp|on|any|none|off}[:[<mtu>][:<macaddr>]]
+#       ip=<client-IP-number>:<server-IP-number>:<gateway-IP-number>:<netmask>:<client-hostname>:[<interface>]:{dhcp|on|any|none|off}[:[<mtu>][:<macaddr>]]
 #
-# When supplying more than only ip= line, <interface> is mandatory and
-# bootdev= must contain the name of the primary interface to use for
-# routing,dns,dhcp-options,etc.
+# When supplying more than only ip= line, <interface> is mandatory,
+# unless the <interface> can be dynamically determined by the macaddr,
+# and bootdev= must contain the name of the primary interface to use
+# for routing,dns,dhcp-options,etc.
 #
 
 command -v getarg >/dev/null          || . /lib/dracut-lib.sh
@@ -95,6 +96,9 @@ for p in $(getargs ip=); do
         fi
         # IFACES list for later use
         IFACES="$IFACES $dev"
+    else
+        # Since we are now allowing MAC-based assignment without specifying name
+        dev=$(iface_for_mac $macaddr)
     fi
 
     # Do we need to check for specific options?
